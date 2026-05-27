@@ -144,6 +144,7 @@ public class MainActivity extends Activity {
         private final RectF midiButton = new RectF();
         private final RectF volumeTrack = new RectF();
         private final RectF velocityTrack = new RectF();
+        private final RectF tempRect = new RectF();
         private int activeControl = CONTROL_NONE;
 
         DrumKitView(Context ctx, KitListener listener) {
@@ -157,58 +158,94 @@ public class MainActivity extends Activity {
 
         private void layoutPads(int w, int h) {
             pads.clear();
-            float top = Math.max(60f, h * 0.10f);
-            float bottom = h - Math.max(88f, h * 0.14f);
+            float top = Math.max(24f, h * 0.04f);
+            float bottom = h - Math.max(44f, h * 0.07f);
             float kitH = bottom - top;
             float u = Math.min(w, kitH) / 10f;
 
-            pads.add(new Pad("CRASH", NOTE_CRASH, oval(w*.08f, top + kitH*.04f, u*1.22f), true));
-            pads.add(new Pad("SPLASH", NOTE_SPLASH, oval(w*.36f, top + kitH*.06f, u*.78f), true));
-            pads.add(new Pad("CRASH", NOTE_CRASH, oval(w*.60f, top + kitH*.05f, u*1.02f), true));
-            pads.add(new Pad("RIDE", NOTE_RIDE, oval(w*.84f, top + kitH*.06f, u*1.28f), true));
-            pads.add(new Pad("CLOSED HH", NOTE_HIHAT_CLOSED, oval(w*.88f, top + kitH*.42f, u*.88f), true));
-            pads.add(new Pad("OPEN HH", NOTE_HIHAT_OPEN, oval(w*.92f, top + kitH*.69f, u*.88f), true));
-            pads.add(new Pad("FLOOR", NOTE_FLOOR, oval(w*.07f, top + kitH*.70f, u*1.12f), false));
-            pads.add(new Pad("TOM", NOTE_TOM_MID, oval(w*.31f, top + kitH*.41f, u*.88f), false));
-            pads.add(new Pad("TOM", NOTE_TOM_HIGH, oval(w*.49f, top + kitH*.31f, u*.88f), false));
-            pads.add(new Pad("TOM", NOTE_TOM_LOW, oval(w*.68f, top + kitH*.41f, u*.88f), false));
-            pads.add(new Pad("KICK", NOTE_KICK, oval(w*.30f, top + kitH*.79f, u*1.58f), false));
-            pads.add(new Pad("KICK", NOTE_KICK, oval(w*.62f, top + kitH*.79f, u*1.58f), false));
-            pads.add(new Pad("SNARE", NOTE_SNARE, oval(w*.50f, top + kitH*.60f, u*1.12f), false));
+            pads.add(new Pad("CRASH", NOTE_CRASH, oval(w*.10f, top + kitH*.04f, u*1.46f), true));
+            pads.add(new Pad("SPLASH", NOTE_SPLASH, oval(w*.36f, top + kitH*.05f, u*.88f), true));
+            pads.add(new Pad("CRASH", NOTE_CRASH, oval(w*.60f, top + kitH*.04f, u*1.08f), true));
+            pads.add(new Pad("RIDE", NOTE_RIDE, oval(w*.84f, top + kitH*.06f, u*1.44f), true));
+            pads.add(new Pad("CLOSED HH", NOTE_HIHAT_CLOSED, oval(w*.88f, top + kitH*.42f, u*.92f), true));
+            pads.add(new Pad("OPEN HH", NOTE_HIHAT_OPEN, oval(w*.94f, top + kitH*.67f, u*.90f), true));
+            pads.add(new Pad("FLOOR", NOTE_FLOOR, oval(w*.08f, top + kitH*.71f, u*1.22f), false));
+            pads.add(new Pad("TOM", NOTE_TOM_MID, oval(w*.31f, top + kitH*.43f, u*.92f), false));
+            pads.add(new Pad("TOM", NOTE_TOM_HIGH, oval(w*.49f, top + kitH*.31f, u*.96f), false));
+            pads.add(new Pad("TOM", NOTE_TOM_LOW, oval(w*.68f, top + kitH*.43f, u*.94f), false));
+            pads.add(new Pad("KICK", NOTE_KICK, oval(w*.31f, top + kitH*.82f, u*1.72f), false));
+            pads.add(new Pad("KICK", NOTE_KICK, oval(w*.63f, top + kitH*.82f, u*1.72f), false));
+            pads.add(new Pad("SNARE", NOTE_SNARE, oval(w*.50f, top + kitH*.62f, u*1.16f), false));
 
-            midiButton.set(w - 320f, 16f, w - 18f, 56f);
-            volumeTrack.set(94f, h - 52f, Math.min(w * 0.44f, 420f), h - 38f);
-            velocityTrack.set(w * 0.56f, h - 52f, w - 96f, h - 38f);
+            midiButton.set(w - Math.min(300f, w*.30f), 14f, w - 16f, 54f);
+            volumeTrack.set(78f, h - 34f, Math.min(w * 0.36f, 360f), h - 24f);
+            velocityTrack.set(w * 0.59f, h - 34f, w - 82f, h - 24f);
         }
         private RectF oval(float cx, float cy, float r) { return new RectF(cx-r, cy-r*.68f, cx+r, cy+r*.68f); }
 
         @Override protected void onDraw(Canvas c) {
             super.onDraw(c);
             drawBg(c);
+            drawHardware(c);
             drawTopBar(c);
             for (Pad pad : pads) drawPad(c, pad);
             drawControls(c);
         }
         private void drawBg(Canvas c) {
-            p.setStrokeWidth(2); p.setColor(Color.rgb(20,22,24));
-            for (int i=-getHeight(); i<getWidth(); i+=36) c.drawLine(i, getHeight(), i+getHeight(), 0, p);
+            LinearGradient bg = new LinearGradient(0, 0, getWidth(), getHeight(),
+                    Color.rgb(6, 7, 8), Color.rgb(22, 20, 18), Shader.TileMode.CLAMP);
+            p.setStyle(Paint.Style.FILL);
+            p.setShader(bg);
+            c.drawRect(0, 0, getWidth(), getHeight(), p);
+            p.setShader(null);
+
+            p.setStrokeWidth(3);
+            for (int i=-getHeight(); i<getWidth(); i+=42) {
+                p.setColor(Color.argb(120, 0, 0, 0));
+                c.drawLine(i, getHeight(), i + getHeight(), 0, p);
+                p.setColor(Color.argb(42, 255, 255, 255));
+                c.drawLine(i + 4, getHeight(), i + getHeight() + 4, 0, p);
+            }
+            p.setStyle(Paint.Style.FILL);
+            RadialGradient vignette = new RadialGradient(getWidth()/2f, getHeight()/2f, getWidth()*.74f,
+                    Color.argb(0, 0, 0, 0), Color.argb(175, 0, 0, 0), Shader.TileMode.CLAMP);
+            p.setShader(vignette);
+            c.drawRect(0, 0, getWidth(), getHeight(), p);
+            p.setShader(null);
+        }
+        private void drawHardware(Canvas c) {
+            p.setStyle(Paint.Style.STROKE);
+            p.setStrokeCap(Paint.Cap.ROUND);
+            p.setStrokeWidth(5);
+            p.setColor(Color.argb(145, 180, 178, 168));
+            drawStand(c, getWidth()*.36f, getHeight()*.12f, getWidth()*.45f, getHeight()*.54f);
+            drawStand(c, getWidth()*.60f, getHeight()*.12f, getWidth()*.55f, getHeight()*.56f);
+            drawStand(c, getWidth()*.84f, getHeight()*.16f, getWidth()*.76f, getHeight()*.63f);
+            drawStand(c, getWidth()*.88f, getHeight()*.44f, getWidth()*.82f, getHeight()*.70f);
+            p.setStrokeCap(Paint.Cap.BUTT);
+        }
+        private void drawStand(Canvas c, float x1, float y1, float x2, float y2) {
+            c.drawLine(x1, y1, x2, y2, p);
+            c.drawLine(x2, y2, x2 - 34, y2 + 44, p);
+            c.drawLine(x2, y2, x2 + 38, y2 + 42, p);
         }
         private void drawTopBar(Canvas c) {
             p.setStyle(Paint.Style.FILL);
-            p.setColor(Color.argb(185, 10, 12, 14));
-            c.drawRect(0, 0, getWidth(), 68, p);
+            p.setColor(Color.argb(92, 8, 10, 12));
+            tempRect.set(14, 12, Math.min(322, getWidth()*.42f), 54);
+            c.drawRoundRect(tempRect, 10, 10, p);
 
             p.setTextAlign(Paint.Align.LEFT);
             p.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
-            p.setTextSize(24);
-            p.setColor(Color.rgb(230,245,245));
-            c.drawText("DRUM MIDI CONTROLLER", 24, 42, p);
+            p.setTextSize(18);
+            p.setColor(Color.rgb(218,238,238));
+            c.drawText("DRUM MIDI", 28, 39, p);
 
             p.setStyle(Paint.Style.FILL);
-            p.setColor(Color.rgb(14, 124, 134));
+            p.setColor(Color.argb(185, 9, 102, 113));
             c.drawRoundRect(midiButton, 8, 8, p);
             p.setTextAlign(Paint.Align.CENTER);
-            p.setTextSize(15);
+            p.setTextSize(14);
             p.setColor(Color.WHITE);
             c.drawText("MIDI: " + fitText(listener.getMidiTargetName(), 24), midiButton.centerX(), 34, p);
             p.setTextSize(12);
@@ -222,51 +259,180 @@ public class MainActivity extends Activity {
         private void drawPad(Canvas c, Pad pad) {
             long age = SystemClock.uptimeMillis() - pad.lastHit;
             boolean active = age < 90;
+            if (pad.cymbal) drawCymbal(c, pad, active);
+            else drawDrum(c, pad, active);
+        }
+        private void drawCymbal(Canvas c, Pad pad, boolean active) {
             RectF r = pad.rect;
             p.setStyle(Paint.Style.FILL);
-            if (pad.cymbal) {
-                RadialGradient g = new RadialGradient(r.centerX(), r.centerY(), r.width()/2,
-                        active ? Color.rgb(255,245,205) : Color.rgb(240,170,92),
-                        Color.rgb(158,83,40), Shader.TileMode.CLAMP);
-                p.setShader(g); c.drawOval(r, p); p.setShader(null);
-                p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(12); p.setColor(active ? Color.rgb(255,220,80) : Color.rgb(210,105,70)); c.drawOval(r, p);
-                p.setStrokeWidth(0);
-            } else {
-                p.setColor(Color.rgb(52,52,45)); c.drawOval(r, p);
-                p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(12); p.setColor(active ? Color.rgb(0,190,205) : Color.rgb(13,124,134)); c.drawOval(r, p);
-                p.setStrokeWidth(4); p.setColor(Color.rgb(190,160,125)); c.drawOval(r, p);
-                if (pad.label.equals("KICK")) { p.setStyle(Paint.Style.FILL); p.setColor(Color.rgb(225,228,226)); c.drawCircle(r.centerX(), r.centerY(), r.height()*0.27f, p); }
+            p.setColor(Color.argb(118, 0, 0, 0));
+            tempRect.set(r);
+            tempRect.offset(0, r.height() * .12f);
+            c.drawOval(tempRect, p);
+
+            RadialGradient radial = new RadialGradient(r.centerX(), r.centerY(), r.width()/2f,
+                    new int[]{
+                            active ? Color.rgb(255, 250, 215) : Color.rgb(255, 218, 164),
+                            Color.rgb(223, 132, 70),
+                            Color.rgb(116, 62, 34)
+                    },
+                    new float[]{0f, .58f, 1f},
+                    Shader.TileMode.CLAMP);
+            p.setShader(radial);
+            c.drawOval(r, p);
+            p.setShader(null);
+
+            SweepGradient sweep = new SweepGradient(r.centerX(), r.centerY(),
+                    new int[]{
+                            Color.argb(70,255,255,255), Color.argb(0,255,255,255),
+                            Color.argb(105,70,35,16), Color.argb(0,255,255,255),
+                            Color.argb(90,255,244,206), Color.argb(0,255,255,255)
+                    },
+                    null);
+            p.setShader(sweep);
+            p.setAlpha(170);
+            c.drawOval(r, p);
+            p.setAlpha(255);
+            p.setShader(null);
+
+            p.setStyle(Paint.Style.STROKE);
+            p.setStrokeWidth(Math.max(5f, r.width()*.04f));
+            p.setColor(accentColor(pad, active));
+            c.drawArc(r, 210, 92, false, p);
+            p.setStrokeWidth(2);
+            p.setColor(Color.argb(70, 70, 35, 12));
+            for (float scale = .32f; scale <= .82f; scale += .17f) {
+                tempRect.set(r.centerX() - r.width()*scale/2f, r.centerY() - r.height()*scale/2f,
+                        r.centerX() + r.width()*scale/2f, r.centerY() + r.height()*scale/2f);
+                c.drawOval(tempRect, p);
             }
-            p.setStyle(Paint.Style.FILL); p.setTextAlign(Paint.Align.CENTER); p.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
-            p.setTextSize(Math.max(18, r.width()*0.10f)); p.setColor(pad.cymbal ? Color.rgb(35,35,30) : Color.rgb(210,245,245));
-            c.save(); c.rotate(pad.cymbal ? 12 : 0, r.centerX(), r.centerY()); c.drawText(pad.label, r.centerX(), r.centerY()+p.getTextSize()/3, p); c.restore();
+
+            drawHub(c, r.centerX(), r.centerY(), r.height()*.09f);
+            drawLabel(c, pad.label, r.centerX(), r.bottom - r.height()*.22f, r.width()*.11f, Color.rgb(42, 37, 28), 16);
+        }
+        private void drawDrum(Canvas c, Pad pad, boolean active) {
+            RectF r = pad.rect;
+            p.setStyle(Paint.Style.FILL);
+            p.setColor(Color.argb(142, 0, 0, 0));
+            tempRect.set(r);
+            tempRect.offset(0, r.height()*.13f);
+            c.drawOval(tempRect, p);
+
+            boolean kick = pad.label.equals("KICK");
+            boolean snare = pad.note == NOTE_SNARE;
+            float rim = Math.max(10f, r.width() * (kick ? .035f : .055f));
+
+            LinearGradient shell = new LinearGradient(r.left, r.top, r.right, r.bottom,
+                    kick ? Color.rgb(72, 61, 44) : Color.rgb(12, 120, 132),
+                    kick ? Color.rgb(36, 32, 25) : Color.rgb(6, 72, 82),
+                    Shader.TileMode.CLAMP);
+            p.setShader(shell);
+            c.drawOval(r, p);
+            p.setShader(null);
+
+            p.setStyle(Paint.Style.STROKE);
+            p.setStrokeWidth(rim);
+            p.setColor(Color.rgb(84, 86, 82));
+            c.drawOval(r, p);
+            p.setStrokeWidth(Math.max(3f, rim*.28f));
+            p.setColor(Color.rgb(218, 214, 200));
+            c.drawOval(r, p);
+
+            tempRect.set(r);
+            tempRect.inset(r.width()*(kick ? .19f : .18f), r.height()*(kick ? .22f : .18f));
+            RadialGradient head = new RadialGradient(tempRect.centerX(), tempRect.centerY(), tempRect.width()*.58f,
+                    snare ? Color.rgb(218, 221, 212) : Color.rgb(88, 80, 65),
+                    snare ? Color.rgb(76, 70, 60) : Color.rgb(54, 48, 38),
+                    Shader.TileMode.CLAMP);
+            p.setStyle(Paint.Style.FILL);
+            p.setShader(head);
+            c.drawOval(tempRect, p);
+            p.setShader(null);
+
+            if (kick) {
+                tempRect.inset(tempRect.width()*.25f, tempRect.height()*.18f);
+                p.setColor(Color.rgb(225, 228, 226));
+                c.drawOval(tempRect, p);
+                drawLabel(c, "KICK", tempRect.centerX(), tempRect.centerY()+tempRect.height()*.12f, r.width()*.20f, Color.rgb(10, 126, 137), 26);
+            } else {
+                drawLabel(c, pad.label, r.centerX(), r.bottom - r.height()*.16f, r.width()*.12f,
+                        snare ? Color.rgb(10, 126, 137) : Color.rgb(226, 244, 244), 18);
+            }
+
+            drawLugs(c, r, kick ? 10 : 8);
+            if (active) drawActiveGlow(c, r);
+        }
+        private int accentColor(Pad pad, boolean active) {
+            if (active) return Color.rgb(255, 236, 105);
+            if (pad.note == NOTE_RIDE) return Color.rgb(236, 168, 24);
+            if (pad.note == NOTE_SPLASH) return Color.rgb(142, 151, 38);
+            return Color.rgb(207, 78, 62);
+        }
+        private void drawHub(Canvas c, float cx, float cy, float radius) {
+            RadialGradient hub = new RadialGradient(cx, cy, radius,
+                    Color.rgb(230, 230, 218), Color.rgb(37, 42, 43), Shader.TileMode.CLAMP);
+            p.setStyle(Paint.Style.FILL);
+            p.setShader(hub);
+            c.drawCircle(cx, cy, radius, p);
+            p.setShader(null);
+            p.setStyle(Paint.Style.STROKE);
+            p.setStrokeWidth(2);
+            p.setColor(Color.argb(160, 0, 0, 0));
+            c.drawCircle(cx, cy, radius*.66f, p);
+        }
+        private void drawLugs(Canvas c, RectF r, int count) {
+            p.setStyle(Paint.Style.FILL);
+            for (int i = 0; i < count; i++) {
+                double angle = Math.PI * 2 * i / count;
+                float x = r.centerX() + (float)Math.cos(angle) * r.width()*.49f;
+                float y = r.centerY() + (float)Math.sin(angle) * r.height()*.49f;
+                p.setColor(Color.rgb(220, 216, 205));
+                c.drawCircle(x, y, Math.max(4f, r.width()*.018f), p);
+                p.setColor(Color.rgb(68, 70, 68));
+                c.drawCircle(x, y, Math.max(2f, r.width()*.009f), p);
+            }
+        }
+        private void drawActiveGlow(Canvas c, RectF r) {
+            p.setStyle(Paint.Style.STROKE);
+            p.setStrokeWidth(Math.max(8f, r.width()*.035f));
+            p.setColor(Color.argb(190, 0, 214, 232));
+            c.drawOval(r, p);
+        }
+        private void drawLabel(Canvas c, String label, float x, float y, float size, int color, float minSize) {
+            p.setStyle(Paint.Style.FILL);
+            p.setTextAlign(Paint.Align.CENTER);
+            p.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
+            p.setTextSize(Math.max(minSize, size));
+            p.setColor(color);
+            c.drawText(label, x, y, p);
         }
         private void drawControls(Canvas c) {
             p.setStyle(Paint.Style.FILL);
-            p.setColor(Color.argb(190, 10, 12, 14));
-            c.drawRect(0, getHeight() - 76, getWidth(), getHeight(), p);
+            p.setColor(Color.argb(108, 8, 10, 12));
+            tempRect.set(14, getHeight() - 52, getWidth() - 14, getHeight() - 10);
+            c.drawRoundRect(tempRect, 10, 10, p);
             drawSlider(c, "VOL", listener.getMasterVolume(), volumeTrack);
             drawSlider(c, "VEL", listener.getVelocitySensitivity(), velocityTrack);
         }
         private void drawSlider(Canvas c, String label, float value, RectF track) {
             p.setTypeface(Typeface.DEFAULT_BOLD);
             p.setTextAlign(Paint.Align.RIGHT);
-            p.setTextSize(18);
+            p.setTextSize(15);
             p.setColor(Color.rgb(230,245,245));
-            c.drawText(label, track.left - 14, track.centerY() + 7, p);
+            c.drawText(label, track.left - 12, track.centerY() + 5, p);
 
             p.setStyle(Paint.Style.FILL);
-            p.setColor(Color.rgb(55, 58, 58));
+            p.setColor(Color.rgb(42, 45, 45));
             c.drawRoundRect(track, 8, 8, p);
             RectF fill = new RectF(track.left, track.top, track.left + track.width() * value, track.bottom);
-            p.setColor(Color.rgb(0, 170, 184));
+            p.setColor(Color.rgb(16, 149, 160));
             c.drawRoundRect(fill, 8, 8, p);
-            p.setColor(Color.WHITE);
-            c.drawCircle(fill.right, track.centerY(), 13, p);
+            p.setColor(Color.rgb(235, 238, 232));
+            c.drawCircle(fill.right, track.centerY(), 10, p);
             p.setTextAlign(Paint.Align.LEFT);
-            p.setTextSize(14);
+            p.setTextSize(12);
             p.setColor(Color.rgb(205, 235, 235));
-            c.drawText(Math.round(value * 100) + "%", track.right + 14, track.centerY() + 5, p);
+            c.drawText(Math.round(value * 100) + "%", track.right + 12, track.centerY() + 4, p);
         }
         @Override public boolean onTouchEvent(MotionEvent e) {
             int action = e.getActionMasked();
