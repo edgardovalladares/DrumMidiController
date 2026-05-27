@@ -161,26 +161,26 @@ public class MainActivity extends Activity {
 
         private void layoutPads(int w, int h) {
             pads.clear();
-            float sx = w / 1333f;
-            float sy = h / 789f;
+            float sx = w / 1323f;
+            float sy = h / 662f;
             float s = Math.min(sx, sy);
-            float ox = (w - 1333f * s) / 2f;
-            float oy = (h - 789f * s) / 2f;
-            designRect.set(ox, oy, ox + 1333f * s, oy + 789f * s);
+            float ox = (w - 1323f * s) / 2f;
+            float oy = (h - 662f * s) / 2f;
+            designRect.set(ox, oy, ox + 1323f * s, oy + 662f * s);
 
-            pads.add(new Pad("KICK", NOTE_KICK, svgRect(503f, 270f, 317f, 317f, ox, oy, s), false));
-            pads.add(new Pad("KICK", NOTE_KICK, svgRect(263f, 385f, 404f, 404f, ox, oy, s), false));
-            pads.add(new Pad("KICK", NOTE_KICK, svgRect(676.5f, 403f, 357f, 357f, ox, oy, s), false));
-            pads.add(new Pad("SNARE", NOTE_SNARE, svgRect(294f, 182f, 278f, 278f, ox, oy, s), false));
-            pads.add(new Pad("TOM", NOTE_TOM_HIGH, svgRect(555f, 122f, 223f, 223f, ox, oy, s), false));
-            pads.add(new Pad("TOM", NOTE_TOM_LOW, svgRect(767f, 213f, 225f, 225f, ox, oy, s), false));
-            pads.add(new Pad("FLOOR", NOTE_FLOOR, svgRect(676.5f, 403f, 357f, 357f, ox, oy, s), false));
-            pads.add(new Pad("CRASH", NOTE_CRASH, svgRect(47f, 13f, 338f, 338f, ox, oy, s), true));
-            pads.add(new Pad("SPLASH", NOTE_SPLASH, svgRect(385f, 0f, 263f, 263f, ox, oy, s), true));
-            pads.add(new Pad("CRASH", NOTE_CRASH, svgRect(723f, 47f, 205f, 205f, ox, oy, s), true));
-            pads.add(new Pad("RIDE", NOTE_RIDE, svgRect(928f, 65f, 297f, 297f, ox, oy, s), true));
-            pads.add(new Pad("CLOSED HH", NOTE_HIHAT_CLOSED, svgRect(1013f, 270f, 250f, 250f, ox, oy, s), true));
-            pads.add(new Pad("OPEN HH", NOTE_HIHAT_OPEN, svgRect(1043f, 403f, 290f, 290f, ox, oy, s), true));
+            pads.add(new Pad("KICK", NOTE_KICK, svgRect(503f, 244f, 317f, 317f, ox, oy, s), false));
+            pads.add(new Pad("KICK", NOTE_KICK, svgRect(372f, 418f, 149f, 180f, ox, oy, s), false));
+            pads.add(new Pad("KICK", NOTE_KICK, svgRect(814f, 405f, 128f, 182f, ox, oy, s), false));
+            pads.add(new Pad("SNARE", NOTE_SNARE, svgRect(294f, 156f, 278f, 278f, ox, oy, s), false));
+            pads.add(new Pad("TOM", NOTE_TOM_HIGH, svgRect(555f, 96f, 223f, 223f, ox, oy, s), false));
+            pads.add(new Pad("TOM", NOTE_TOM_LOW, svgRect(767f, 187f, 225f, 225f, ox, oy, s), false));
+            pads.add(new Pad("FLOOR", NOTE_FLOOR, svgRect(24f, 273f, 314f, 314f, ox, oy, s), false));
+            pads.add(new Pad("CRASH", NOTE_CRASH, svgRect(47f, 0f, 338f, 325f, ox, oy, s), true));
+            pads.add(new Pad("SPLASH", NOTE_SPLASH, svgRect(385f, 0f, 263f, 237f, ox, oy, s), true));
+            pads.add(new Pad("CRASH", NOTE_CRASH, svgRect(723f, 21f, 205f, 205f, ox, oy, s), true));
+            pads.add(new Pad("RIDE", NOTE_RIDE, svgRect(928f, 39f, 297f, 297f, ox, oy, s), true));
+            pads.add(new Pad("CLOSED HH", NOTE_HIHAT_CLOSED, svgRect(1013f, 244f, 250f, 250f, ox, oy, s), true));
+            pads.add(new Pad("OPEN HH", NOTE_HIHAT_OPEN, svgRect(1043f, 377f, 107f, 210f, ox, oy, s), true));
 
             midiButton.set(w - 190f, 14f, w - 16f, 52f);
             volumeTrack.set(72f, h - 36f, Math.min(w * 0.34f, 320f), h - 24f);
@@ -453,23 +453,6 @@ public class MainActivity extends Activity {
         }
         private boolean hit(MotionEvent e, int index) {
             float x=e.getX(index), y=e.getY(index);
-            if (midiButton.contains(x, y)) {
-                listener.onSelectMidiOutput();
-                performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-                invalidate();
-                return true;
-            }
-            if (isNearTrack(volumeTrack, x, y)) {
-                activeControl = CONTROL_VOLUME;
-                updateControl(x);
-                return true;
-            }
-            if (isNearTrack(velocityTrack, x, y)) {
-                activeControl = CONTROL_VELOCITY;
-                updateControl(x);
-                return true;
-            }
-
             float pressure=Math.max(.25f, e.getPressure(index));
             for (int i=pads.size()-1; i>=0; i--) {
                 Pad pad=pads.get(i);
