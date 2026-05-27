@@ -145,6 +145,8 @@ public class MainActivity extends Activity {
         private final RectF volumeTrack = new RectF();
         private final RectF velocityTrack = new RectF();
         private final RectF tempRect = new RectF();
+        private final RectF designRect = new RectF();
+        private final Bitmap drumDesign;
         private int activeControl = CONTROL_NONE;
 
         DrumKitView(Context ctx, KitListener listener) {
@@ -152,45 +154,63 @@ public class MainActivity extends Activity {
             this.listener = listener;
             setBackgroundColor(Color.rgb(8, 9, 10));
             setFocusable(true);
+            drumDesign = BitmapFactory.decodeResource(getResources(), R.drawable.drum_design);
         }
 
         @Override protected void onSizeChanged(int w, int h, int oldw, int oldh) { layoutPads(w, h); }
 
         private void layoutPads(int w, int h) {
             pads.clear();
-            float sx = w / 1200f;
-            float sy = h / 630f;
+            float sx = w / 1333f;
+            float sy = h / 789f;
             float s = Math.min(sx, sy);
-            float ox = (w - 1200f * s) / 2f;
-            float oy = (h - 630f * s) / 2f;
+            float ox = (w - 1333f * s) / 2f;
+            float oy = (h - 789f * s) / 2f;
+            designRect.set(ox, oy, ox + 1333f * s, oy + 789f * s);
 
-            pads.add(new Pad("CRASH", NOTE_CRASH, circle(ox + 180f*s, oy + 85f*s, 125f*s), true));
-            pads.add(new Pad("SPLASH", NOTE_SPLASH, circle(ox + 438f*s, oy + 63f*s, 82f*s), true));
-            pads.add(new Pad("CRASH", NOTE_CRASH, circle(ox + 795f*s, oy + 80f*s, 120f*s), true));
-            pads.add(new Pad("RIDE", NOTE_RIDE, circle(ox + 1033f*s, oy + 83f*s, 148f*s), true));
-            pads.add(new Pad("CLOSED HH", NOTE_HIHAT_CLOSED, circle(ox + 1055f*s, oy + 295f*s, 85f*s), true));
-            pads.add(new Pad("OPEN HH", NOTE_HIHAT_OPEN, circle(ox + 1090f*s, oy + 410f*s, 85f*s), true));
-            pads.add(new Pad("FLOOR", NOTE_FLOOR, circle(ox + 48f*s, oy + 273f*s, 92f*s), false));
-            pads.add(new Pad("TOM", NOTE_TOM_MID, circle(ox + 440f*s, oy + 235f*s, 85f*s), false));
-            pads.add(new Pad("TOM", NOTE_TOM_HIGH, circle(ox + 600f*s, oy + 145f*s, 90f*s), false));
-            pads.add(new Pad("TOM", NOTE_TOM_LOW, circle(ox + 760f*s, oy + 235f*s, 85f*s), false));
-            pads.add(new Pad("KICK", NOTE_KICK, circle(ox + 363f*s, oy + 528f*s, 142f*s), false));
-            pads.add(new Pad("KICK", NOTE_KICK, circle(ox + 848f*s, oy + 528f*s, 142f*s), false));
-            pads.add(new Pad("SNARE", NOTE_SNARE, circle(ox + 600f*s, oy + 333f*s, 122f*s), false));
+            pads.add(new Pad("KICK", NOTE_KICK, svgRect(503f, 270f, 317f, 317f, ox, oy, s), false));
+            pads.add(new Pad("KICK", NOTE_KICK, svgRect(263f, 385f, 404f, 404f, ox, oy, s), false));
+            pads.add(new Pad("KICK", NOTE_KICK, svgRect(676.5f, 403f, 357f, 357f, ox, oy, s), false));
+            pads.add(new Pad("SNARE", NOTE_SNARE, svgRect(294f, 182f, 278f, 278f, ox, oy, s), false));
+            pads.add(new Pad("TOM", NOTE_TOM_HIGH, svgRect(555f, 122f, 223f, 223f, ox, oy, s), false));
+            pads.add(new Pad("TOM", NOTE_TOM_LOW, svgRect(767f, 213f, 225f, 225f, ox, oy, s), false));
+            pads.add(new Pad("FLOOR", NOTE_FLOOR, svgRect(676.5f, 403f, 357f, 357f, ox, oy, s), false));
+            pads.add(new Pad("CRASH", NOTE_CRASH, svgRect(47f, 13f, 338f, 338f, ox, oy, s), true));
+            pads.add(new Pad("SPLASH", NOTE_SPLASH, svgRect(385f, 0f, 263f, 263f, ox, oy, s), true));
+            pads.add(new Pad("CRASH", NOTE_CRASH, svgRect(723f, 47f, 205f, 205f, ox, oy, s), true));
+            pads.add(new Pad("RIDE", NOTE_RIDE, svgRect(928f, 65f, 297f, 297f, ox, oy, s), true));
+            pads.add(new Pad("CLOSED HH", NOTE_HIHAT_CLOSED, svgRect(1013f, 270f, 250f, 250f, ox, oy, s), true));
+            pads.add(new Pad("OPEN HH", NOTE_HIHAT_OPEN, svgRect(1043f, 403f, 290f, 290f, ox, oy, s), true));
 
-            midiButton.set(w - Math.min(300f, w*.30f), 14f, w - 16f, 54f);
-            volumeTrack.set(78f, h - 34f, Math.min(w * 0.36f, 360f), h - 24f);
-            velocityTrack.set(w * 0.59f, h - 34f, w - 82f, h - 24f);
+            midiButton.set(w - 190f, 14f, w - 16f, 52f);
+            volumeTrack.set(72f, h - 36f, Math.min(w * 0.34f, 320f), h - 24f);
+            velocityTrack.set(w * 0.62f, h - 36f, w - 72f, h - 24f);
         }
-        private RectF circle(float cx, float cy, float r) { return new RectF(cx-r, cy-r, cx+r, cy+r); }
+        private RectF svgRect(float x, float y, float w, float h, float ox, float oy, float s) {
+            return new RectF(ox + x*s, oy + y*s, ox + (x+w)*s, oy + (y+h)*s);
+        }
 
         @Override protected void onDraw(Canvas c) {
             super.onDraw(c);
-            drawBg(c);
-            drawHardware(c);
-            drawTopBar(c);
-            for (Pad pad : pads) drawPad(c, pad);
-            drawControls(c);
+            drawDesign(c);
+            drawHitFeedback(c);
+        }
+        private void drawDesign(Canvas c) {
+            p.setStyle(Paint.Style.FILL);
+            p.setColor(Color.BLACK);
+            c.drawRect(0, 0, getWidth(), getHeight(), p);
+            if (drumDesign != null) c.drawBitmap(drumDesign, null, designRect, p);
+        }
+        private void drawHitFeedback(Canvas c) {
+            long now = SystemClock.uptimeMillis();
+            p.setStyle(Paint.Style.FILL);
+            for (Pad pad : pads) {
+                long age = now - pad.lastHit;
+                if (age >= 110) continue;
+                int alpha = Math.max(0, 120 - (int)(age * 120 / 110));
+                p.setColor(Color.argb(alpha, pad.cymbal ? 255 : 8, pad.cymbal ? 235 : 210, pad.cymbal ? 120 : 225));
+                c.drawOval(pad.rect, p);
+            }
         }
         private void drawBg(Canvas c) {
             LinearGradient bg = new LinearGradient(0, 0, getWidth(), getHeight(),
